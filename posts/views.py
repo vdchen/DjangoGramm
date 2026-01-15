@@ -64,7 +64,7 @@ def toggle_like(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     user = request.user
 
-    if user in post.likes.all():
+    if post.likes.filter(id=user.id).exists():
         post.likes.remove(user)
         liked = False
     else:
@@ -73,7 +73,7 @@ def toggle_like(request, post_id):
 
     return JsonResponse({
         'liked': liked,
-        'count': post.likes.count()
+        'count': post.likes.count(),
     })
 
 

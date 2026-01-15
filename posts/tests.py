@@ -94,11 +94,14 @@ class LikeFunctionalityTest(TestCase):
         self.assertTrue(data['liked'])
         self.assertEqual(data['count'], 1)
 
-        # Verify DB state
-        self.assertTrue(self.user in self.post.likes.all())
+
+        self.assertTrue(self.post.likes.filter(id=self.user.id).exists())
 
         # 2. Second click (Unlike)
         response = self.client.post(self.url)
         data = json.loads(response.content)
         self.assertFalse(data['liked'])
         self.assertEqual(data['count'], 0)
+
+        # Verify DB state: ensure the user is gone
+        self.assertFalse(self.post.likes.filter(id=self.user.id).exists())
