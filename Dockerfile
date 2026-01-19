@@ -1,7 +1,6 @@
 FROM ubuntu:latest
 LABEL authors="vladi"
 
-ENTRYPOINT ["top", "-b"]
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
