@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}{{ profile_user.username }}'s Portfolio{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+      <div class="row">
+          <div class="col-md-4 text-center">
+              {% if target_user.profile.avatar %}
+                  <img src="{{ target_user.profile.avatar.url }}" class="rounded-circle img-thumbnail" style="width: 150px;">
+              {% endif %}
+          </div>
+          <div class="col-md-8">
+              <h2>{{ target_user.username }}</h2>
+              <p><strong>{{ target_user.profile.full_name }}</strong></p>
+              <p>{{ target_user.profile.bio }}</p>
+
+              {% if request.user != target_user %}
+                  {% csrf_token %}
+                  <button id="follow-btn"
+                          data-user-id="{{ target_user.id }}"
+                          class="btn {% if is_following %}btn-outline-secondary{% else %}btn-primary{% endif %}">
+                      {% if is_following %}Unfollow{% else %}Follow{% endif %}
+                  </button>
+              {% endif %}
+          </div>
+      </div>
+  </div>
+    <script>
+        document.getElementById('follow-btn')?.addEventListener('click', function(e) {
+            const btn = e.target;
+            const userId = btn.getAttribute('data-user-id');
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            fetch(`/users/toggle-follow/${userId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.following) {
+                    btn.textContent = 'Unfollow';
+                    btn.classList.replace('btn-primary', 'btn-outline-secondary');
+                } else {
+                    btn.textContent = 'Follow';
+                    btn.classList.replace('btn-outline-secondary', 'btn-primary');
+                }
+            });
+        });
+    </script>
+
+{% endblock %}

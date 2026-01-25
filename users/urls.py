@@ -1,6 +1,8 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from .views import SignUpView, ActivateAccountView, ProfileSetupView, profile_view
+from .views import (SignUpView, ActivateAccountView, ProfileSetupView, profile_view)
+from . import views
+
 
 urlpatterns = [
     # Built-in Login/Logout
@@ -15,4 +17,7 @@ urlpatterns = [
          name='activate'),
     path('profile-setup/', ProfileSetupView.as_view(), name='profile_setup'),
     path('profile/<str:username>/', profile_view, name='profile'),
+    path('profile/<str:username>/', views.user_profile, name='user_profile'),
+    path('toggle-follow/<int:user_id>/', views.toggle_follow,
+         name='toggle_follow'),
 ]

@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     # Third party
     'imagekit',
     'django_cleanup.apps.CleanupConfig',
+    'cloudinary_storage',
+    'cloudinary',
 
     # Local
     'users',
@@ -124,6 +126,15 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': env('CLOUDINARY_NAME'),
+    'API_KEY': env('CLOUDINARY_API_KEY'),
+    'API_SECRET': env('CLOUDINARY_API_SECRET'),
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
 
 # Login Redirects
 LOGIN_REDIRECT_URL = 'home'

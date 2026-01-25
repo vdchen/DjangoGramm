@@ -1,10 +1,14 @@
 from io import BytesIO
+
+import pytest
 from PIL import Image
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
-from .models import Post, Tag
+from unittest.mock import patch
+from users.models import Follow
+from .models import Post, Tag, PostImage
 import json
 
 User = get_user_model()
@@ -72,6 +76,29 @@ class PostCreateViewTest(TestCase):
         self.assertEqual(post.tags.count(), 1)
         self.assertEqual(post.tags.first().name, 'python')
 
+@pytest.mark.django_db
+def test_friends_first_ordering():
+    # 1. Setup: Create 3 users
+    vlad = User.objects.create_user(username='vlad', email='v@test.com')
+    friend = User.objects.create_user(username='friend', email='f@test.com')
+    stranger = User.objects.create_user(username='stranger', email='s@test.com')
+
+    # 2. Vlad follows the friend
+    Follow.objects.create(follower=vlad, following=friend)
+
+    # 3. Create posts (Stranger posts later, Friend posts earlier)
+    Post.objects.create(author=friend, content="Friend post")
+    Post.objects.create(author=stranger, content="Stranger post")
+
+    # 4. Act: Get the feed using your logic
+    # (Assuming your feed logic is in a function or we call the view)
+    from posts.views import feed_view # If you extract the logic
+    posts = list(feed_view(vlad))
+
+    # 5. Assert: The first post should be from the friend, even if it's older
+    # because of our 'priority' annotation.
+    assert posts[0].author == friend
+    assert posts[1].author == stranger
 
 #AJAX Logic
 class LikeFunctionalityTest(TestCase):
@@ -105,3 +132,30 @@ class LikeFunctionalityTest(TestCase):
 
         # Verify DB state: ensure the user is gone
         self.assertFalse(self.post.likes.filter(id=self.user.id).exists())
+
+
+@pytest.mark.django_db
+@patch('cloudinary.uploader.upload') # This mocks the actual network call to Cloudinary
+def test_post_image_upload_mocked(mock_upload, user):
+    # 1. Setup a fake response from Cloudinary
+    mock_upload.return_value = {
+        'public_id': 'test_id',
+        'url': 'http://res.cloudinary.com/demo/image/upload/v123/test.jpg',
+        'secure_url': 'https://res.cloudinary.com/demo/image/upload/v123/test.jpg',
+    }
+
+    # 2. Create a fake image file in memory
+    fake_image = SimpleUploadedFile(
+        name='test_image.jpg',
+        content=b'file_content',
+        content_type='image/jpeg'
+    )
+
+    # 3. Create the post and image
+    post = Post.objects.create(author=user, content="Test Post")
+    img_instance = PostImage.objects.create(post=post, image=fake_image)
+
+    # 4. Assertions
+    assert PostImage.objects.count() == 1
+    # Check that our "fake" upload was called exactly once
+    assert mock_upload.called

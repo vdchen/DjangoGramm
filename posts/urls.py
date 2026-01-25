@@ -1,4 +1,5 @@
 from django.urls import path
+from . import views
 from .views import feed_view, post_create, toggle_like, tag_view
 
 urlpatterns = [
