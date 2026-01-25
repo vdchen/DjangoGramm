@@ -17,39 +17,38 @@
 
               {% if request.user != target_user %}
                   {% csrf_token %}
-                  <button id="follow-btn"
-                          data-user-id="{{ target_user.id }}"
-                          class="btn {% if is_following %}btn-outline-secondary{% else %}btn-primary{% endif %}">
-                      {% if is_following %}Unfollow{% else %}Follow{% endif %}
+                  <button class="btn {% if is_following %}btn-secondary{% else %}btn-primary{% endif %} follow-btn"
+                        data-user-id="{{ target_user.id }}">
+                    {% if is_following %}Unfollow{% else %}Follow{% endif %}
                   </button>
               {% endif %}
           </div>
       </div>
   </div>
-    <script>
-        document.getElementById('follow-btn')?.addEventListener('click', function(e) {
-            const btn = e.target;
-            const userId = btn.getAttribute('data-user-id');
-            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    document.querySelectorAll('.follow-btn').forEach(button => {
+        button.onclick = function() {
+            const userId = this.dataset.userId;
+            const btn = this;
 
-            fetch(`/users/toggle-follow/${userId}/`, {
+            fetch(`/users/toggle-follow/${userId}/`, {  // Double check this URL matches your urls.py!
                 method: 'POST',
                 headers: {
-                    'X-CSRFToken': csrftoken,
-                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
                 }
             })
             .then(response => response.json())
             .then(data => {
                 if (data.following) {
-                    btn.textContent = 'Unfollow';
-                    btn.classList.replace('btn-primary', 'btn-outline-secondary');
+                    btn.innerText = 'Unfollow';
+                    btn.classList.replace('btn-primary', 'btn-secondary');
                 } else {
-                    btn.textContent = 'Follow';
-                    btn.classList.replace('btn-outline-secondary', 'btn-primary');
+                    btn.innerText = 'Follow';
+                    btn.classList.replace('btn-secondary', 'btn-primary');
                 }
-            });
-        });
-    </script>
+            })
+            .catch(error => console.error('Error:', error));
+        };
+    });
 
 {% endblock %}

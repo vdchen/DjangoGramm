@@ -9,7 +9,6 @@
     {% for post in posts %}
         <div class="card mb-4 shadow-sm mx-auto" style="max-width: 600px;">
             <div class="card-header bg-white d-flex align-items-center">
-                <strong>{{ post.author.username }}</strong>
                 <div class="post-header mb-2">
                     <a href="{% url 'user_profile' post.author.username %}" class="text-decoration-none fw-bold text-dark">
                         {% if post.author.profile.avatar %}
@@ -19,7 +18,6 @@
                     </a>
                 </div>
             </div>
-
             {% with post.images.first as post_image %}
                 {% if post_image %}
                                 <div id="carousel{{ post.id }}" class="carousel slide" data-bs-ride="carousel">
