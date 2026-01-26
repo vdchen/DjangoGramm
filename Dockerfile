@@ -30,6 +30,9 @@ RUN SECRET_KEY=dummy \
     EMAIL_HOST_USER=dummy \
     EMAIL_HOST_PASSWORD=dummy \
     DEFAULT_FROM_EMAIL=dummy \
+    CLOUDINARY_NAME=dummy \
+    CLOUDINARY_API_KEY=dummy \
+    CLOUDINARY_API_SECRET=dummy \
     python manage.py collectstatic --noinput
 
 # Run gunicorn

@@ -9,7 +9,15 @@
     {% for post in posts %}
         <div class="card mb-4 shadow-sm mx-auto" style="max-width: 600px;">
             <div class="card-header bg-white d-flex align-items-center">
-                <strong>{{ post.author.username }}</strong>
+                <a href="{% url 'profile' post.author.username %}" class="text-decoration-none fw-bold text-dark">
+                    {# Use the 'hasattr' logic or 'author.profile' safely #}
+                    {% if post.author.profile and post.author.profile.avatar %}
+                        <img src="{{ post.author.profile.avatar.url }}" class="rounded-circle me-2" style="width: 30px; height: 30px; object-fit: cover;">
+                    {% else %}
+                        <i class="bi bi-person-circle me-2"></i>
+                    {% endif %}
+                    {{ post.author.username }}
+                </a>
             </div>
 
             {% with post.images.first as post_image %}

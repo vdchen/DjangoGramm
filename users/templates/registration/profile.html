@@ -14,6 +14,11 @@
                 <img src="https://via.placeholder.com/150" class="rounded-circle border" alt="profile">
         {% endif %}
     </div>
+    <button id="follow-btn"
+            data-user-id="{{ target_user.id }}"
+            class="btn {% if is_following %}btn-outline-secondary{% else %}btn-primary{% endif %}">
+        {% if is_following %}Unfollow{% else %}Follow{% endif %}
+    </button>
     <div class="col-md-8">
         <h2>{{ profile_user.profile.full_name }}</h2>
         <div class="d-flex mb-3">
