@@ -51,4 +51,30 @@
         </div>
     {% endfor %}
 </div>
+    <script>
+        document.getElementById('follow-btn')?.addEventListener('click', function(e) {
+            const btn = e.target;
+            const userId = btn.getAttribute('data-user-id');
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            fetch(`/users/toggle-follow/${userId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.following) {
+                    btn.textContent = 'Unfollow';
+                    btn.classList.replace('btn-primary', 'btn-outline-secondary');
+                } else {
+                    btn.textContent = 'Follow';
+                    btn.classList.replace('btn-outline-secondary', 'btn-primary');
+                }
+            });
+        });
+    </script>
+
 {% endblock %}
