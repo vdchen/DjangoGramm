@@ -47,26 +47,8 @@ def profile_view(request, username):
         'profile_user': profile_user,
         'is_following': is_following,
         'posts': user_posts,
-        'is_following': is_following,
     })
 
-
-# def user_profile(request, username):
-#     # Find the user whose profile we want to see
-#     target_user = get_object_or_404(CustomUser, username=username)
-#
-#     # Check if the logged-in user is already following this person
-#     is_following = False
-#     if request.user.is_authenticated:
-#         is_following = Follow.objects.filter(
-#             follower=request.user,
-#             following=target_user
-#         ).exists()
-#
-#     return render(request, 'users/profile.html', {
-#         'target_user': target_user,
-#         'is_following': is_following,
-#     })
 
 
 class SignUpView(View):

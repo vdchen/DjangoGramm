@@ -41,8 +41,6 @@ INSTALLED_APPS = [
     # Third party
     'imagekit',
     'django_cleanup.apps.CleanupConfig',
-    'cloudinary_storage',
-    'cloudinary',
 
 
     # Local
