@@ -135,6 +135,7 @@ STORAGES = {
 }
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+WHITENOISE_MANIFEST_STRICT = False
 
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': env('CLOUDINARY_NAME', default='dummy'),
