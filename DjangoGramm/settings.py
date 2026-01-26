@@ -28,7 +28,6 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
 # APPLICATION DEFINITION
 
 INSTALLED_APPS = [
-    'cloudinary_storage',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,6 +39,7 @@ INSTALLED_APPS = [
     # Third party
     'imagekit',
     'django_cleanup.apps.CleanupConfig',
+    'cloudinary_storage',
     'cloudinary',
 
     # Local
@@ -133,9 +133,6 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
-
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-WHITENOISE_MANIFEST_STRICT = False
 
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': env('CLOUDINARY_NAME', default='dummy'),
