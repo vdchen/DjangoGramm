@@ -34,6 +34,27 @@
     </div>
 </div>
 
+<hr>
+
+<div class="row">
+    {% for post in posts %}
+        <div class="col-4 mb-4">
+            <div class="ratio ratio-1x1">
+                {% with post.images.first as post_image %}
+                    {% if post_image %}
+                        <img src="{{ post_image.image.url }}" class="object-fit-cover rounded shadow-sm" alt="Post">
+                    {% else %}
+                        <div class="bg-secondary d-flex align-items-center justify-content-center text-white">No Image</div>
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12 text-center py-5">
+            <p class="text-muted">This user hasn't posted anything yet.</p>
+        </div>
+    {% endfor %}
+</div>
 <script>
     document.getElementById('follow-btn')?.addEventListener('click', function(e) {
         const btn = e.target;
