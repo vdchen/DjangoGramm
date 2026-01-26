@@ -1,80 +1,65 @@
 {% extends "base.html" %}
 
-{% block title %}{{ profile_user.username }}'s Portfolio{% endblock %}
-
 {% block content %}
+{% csrf_token %}
+
 <div class="row mb-5">
     <div class="col-md-4 text-center">
         {% if profile_user.profile.avatar %}
-                <img src="{{ profile_user.profile.avatar.url }}"
-                     class="rounded-circle border shadow-sm"
-                     style="width: 150px; height: 150px; object-fit: cover;"
-                     alt="{{ profile_user.username }}">
+            <img src="{{ profile_user.profile.avatar.url }}" class="rounded-circle border shadow-sm" style="width: 150px; height: 150px; object-fit: cover;">
         {% else %}
-                <img src="https://via.placeholder.com/150" class="rounded-circle border" alt="profile">
+            <img src="https://via.placeholder.com/150" class="rounded-circle border" alt="profile">
         {% endif %}
     </div>
-    <button id="follow-btn"
-            data-user-id="{{ target_user.id }}"
-            class="btn {% if is_following %}btn-outline-secondary{% else %}btn-primary{% endif %}">
-        {% if is_following %}Unfollow{% else %}Follow{% endif %}
-    </button>
+
     <div class="col-md-8">
-        <h2>{{ profile_user.profile.full_name }}</h2>
+        <div class="d-flex align-items-center mb-3">
+            <h2 class="me-3 mb-0">{{ profile_user.username }}</h2>
+            {% if user.is_authenticated and user != profile_user %}
+                <button id="follow-btn"
+                        data-user-id="{{ profile_user.id }}"
+                        class="btn {% if is_following %}btn-outline-secondary{% else %}btn-primary{% endif %}">
+                    {% if is_following %}Unfollow{% else %}Follow{% endif %}
+                </button>
+            {% endif %}
+        </div>
+
         <div class="d-flex mb-3">
             <div class="me-4"><strong>{{ posts.count }}</strong> posts</div>
-            <div class="me-4"><strong>0</strong> followers</div>
-            <div><strong>0</strong> following</div>
+            <div class="me-4"><strong id="follower-count">{{ profile_user.follower_relationships.count }}</strong> followers</div>
+            <div><strong>{{ profile_user.following_relationships.count }}</strong> following</div>
         </div>
-        <p class="lead">{{ profile_user.profile.bio }}</p>
+        <p class="lead">{{ profile_user.profile.full_name }}</p>
+        <p>{{ profile_user.profile.bio }}</p>
     </div>
 </div>
 
-<hr>
+<script>
+    document.getElementById('follow-btn')?.addEventListener('click', function(e) {
+        const btn = e.target;
+        const userId = btn.getAttribute('data-user-id');
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-<div class="row">
-    {% for post in posts %}
-        <div class="col-4 mb-4">
-            <div class="ratio ratio-1x1">
-                {% with post.images.first as post_image %}
-                    {% if post_image %}
-                        <img src="{{ post_image.image.url }}" class="object-fit-cover rounded shadow-sm" alt="Post">
-                    {% else %}
-                        <div class="bg-secondary d-flex align-items-center justify-content-center text-white">No Image</div>
-                    {% endif %}
-                {% endwith %}
-            </div>
-        </div>
-    {% empty %}
-        <div class="col-12 text-center py-5">
-            <p class="text-muted">This user hasn't posted anything yet.</p>
-        </div>
-    {% endfor %}
-</div>
-    <script>
-        document.getElementById('follow-btn')?.addEventListener('click', function(e) {
-            const btn = e.target;
-            const userId = btn.getAttribute('data-user-id');
-            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-            fetch(`/users/toggle-follow/${userId}/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrftoken,
-                    'Content-Type': 'application/json',
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.following) {
-                    btn.textContent = 'Unfollow';
-                    btn.classList.replace('btn-primary', 'btn-outline-secondary');
-                } else {
-                    btn.textContent = 'Follow';
-                    btn.classList.replace('btn-outline-secondary', 'btn-primary');
-                }
-            });
-        });
-    </script>
-
+        fetch(`/users/toggle-follow/${userId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.following) {
+                btn.textContent = 'Unfollow';
+                btn.classList.replace('btn-primary', 'btn-outline-secondary');
+            } else {
+                btn.textContent = 'Follow';
+                btn.classList.replace('btn-outline-secondary', 'btn-primary');
+            }
+            // Update the count on the page immediately
+            document.getElementById('follower-count').textContent = data.count;
+        })
+        .catch(error => console.error('Error:', error));
+    });
+</script>
 {% endblock %}

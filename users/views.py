@@ -163,11 +163,9 @@ class ProfileSetupView(LoginRequiredMixin, View):
 def toggle_follow(request, user_id):
     target_user = get_object_or_404(CustomUser, id=user_id)
     if target_user == request.user:
-        return JsonResponse({'error': 'You cannot follow yourself'},
-                            status=400)
+        return JsonResponse({'error': 'You cannot follow yourself'}, status=400)
 
-    follow_obj = Follow.objects.filter(follower=request.user,
-                                       following=target_user)
+    follow_obj = Follow.objects.filter(follower=request.user, following=target_user)
 
     if follow_obj.exists():
         follow_obj.delete()
@@ -178,5 +176,5 @@ def toggle_follow(request, user_id):
 
     return JsonResponse({
         'following': following,
-        'count': target_user.following.count()  # followers count
+        'count': target_user.follower_relationships.count() # Changed to use your related_name
     })
