@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}New Post | DjangoGramm{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm mx-auto" style="max-width: 600px;">
+    <div class="card-body">
+        <h3 class="card-title text-center mb-4">Create New Post</h3>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label class="form-label">Upload Pictures (You can select multiple)</label>
+                <input type="file" name="images" class="form-control" multiple>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Caption</label>
+                {{ p_form.caption }}
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ p_form.tags_str.id_for_label }}" class="form-label">Tags</label>
+                {{ p_form.tags_str }}  {% if p_form.tags_str.errors %}
+                    <div class="text-danger">{{ p_form.tags_str.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Share Post</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
