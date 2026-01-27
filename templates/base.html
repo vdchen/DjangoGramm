@@ -1,14 +1,17 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}DjangoGramm{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
         body { background-color: #fafafa; }
         .navbar-brand { font-weight: bold; font-family: 'Trebuchet MS', sans-serif; }
         .main-container { margin-top: 50px; }
+        /* Prevents Vue brackets [[ ]] from showing before JS loads */
+        [v-cloak] { display: none; }
     </style>
 </head>
 <body>
@@ -26,15 +29,15 @@
                     </form>
                 {% else %}
                     <a class="nav-link" href="{% url 'login' %}">Login</a>
-                    <a class="nav-link btn btn-primary text-white ms-2" href="{% url 'signup' %}">Sign Up</a>
+                    <a class="nav-link btn btn-primary ms-2" href="{% url 'signup' %}">Sign Up</a>
                 {% endif %}
             </div>
         </div>
     </nav>
+
     <div class="container main-container">
         <div class="row justify-content-center">
-            <div class="col-md-8">
-                {% if messages %}
+            <div class="col-md-10"> {% if messages %}
                     {% for message in messages %}
                         <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
                             {{ message }}
@@ -42,12 +45,13 @@
                         </div>
                     {% endfor %}
                 {% endif %}
+
                 {% block content %}
                 {% endblock %}
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'dist/bundle.js' %}"></script>
 </body>
 </html>
