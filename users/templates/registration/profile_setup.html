@@ -1,0 +1,8 @@
+<h2>Complete Your Profile</h2>
+<p>Welcome to DjangoGramm! Tell us a bit about yourself to get started.</p>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save and Enter</button>
+</form>

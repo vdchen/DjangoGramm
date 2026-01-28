@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Feed</h1>
+        <a href="{% url 'post_create' %}" class="btn btn-outline-primary">+ New Post</a>
+    </div>
+
+    {% for post in posts %}
+        <div class="card mb-4 shadow-sm mx-auto" style="max-width: 600px;">
+            <div class="card-header bg-white d-flex align-items-center">
+                <a href="{% url 'profile' post.author.username %}" class="text-decoration-none fw-bold text-dark">
+                    {# Use the 'hasattr' logic or 'author.profile' safely #}
+                    {% if post.author.profile and post.author.profile.avatar %}
+                        <img src="{{ post.author.profile.avatar.url }}" class="rounded-circle me-2" style="width: 30px; height: 30px; object-fit: cover;">
+                    {% else %}
+                        <i class="bi bi-person-circle me-2"></i>
+                    {% endif %}
+                    {{ post.author.username }}
+                </a>
+            </div>
+
+            {% with post.images.first as post_image %}
+                {% if post_image %}
+                                <div id="carousel{{ post.id }}" class="carousel slide" data-bs-ride="carousel">
+                                    <div class="carousel-inner">
+                                        {% for post_image in post.images.all %}
+                                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                                <img src="{{ post_image.image.url }}" class="d-block w-100" alt="Post Image">
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% if post.images.count > 1 %}
+                                        <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ post.id }}" data-bs-slide="prev">
+                                            <span class="carousel-control-prev-icon"></span>
+                                        </button>
+                                        <button class="carousel-control-next" type="button" data-bs-target="#carousel{{ post.id }}" data-bs-slide="next">
+                                            <span class="carousel-control-next-icon"></span>
+                                        </button>
+                                    {% endif %}
+                                </div>
+                {% endif %}
+            {% endwith %}
+
+            <button class="btn btn-link like-btn" data-id="{{ post.id }}" style="text-decoration: none;">
+                <span class="heart-icon">{% if request.user in post.likes.all %}❤️{% else %}🤍{% endif %}</span>
+                <span class="like-count">{{ post.total_likes }}</span>
+            </button>
+
+            <div class="card-body">
+                <p><strong>{{ post.author.username }}</strong> {{ post.caption }}</p>
+
+                {% for tag in post.tags.all %}
+                    <a href="{% url 'tag_filter' tag.name %}" class="badge bg-primary text-decoration-none">
+                        #{{ tag.name }}
+                    </a>
+                {% endfor %}
+                <hr>
+                <small class="text-muted">{{ post.created_at|timesince }} ago</small>
+            </div>
+        </div>
+
+    {% empty %}
+        <div class="text-center mt-5">
+            <p class="lead">No posts yet. Be the first to share something!</p>
+        </div>
+    {% endfor %}
+
+    <script>
+        document.querySelectorAll('.like-btn').forEach(button => {
+            button.onclick = function() {
+                const postId = this.dataset.id;
+                const heartSpan = this.querySelector('.heart-icon');
+                const countSpan = this.querySelector('.like-count');
+
+                fetch(`/post/like/${postId}/`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    heartSpan.innerText = data.liked ? '❤️' : '🤍';
+                    countSpan.innerText = data.count;
+                })
+                .catch(error => console.error('Error:', error));
+            };
+        });
+    </script>
+{% endblock %}
