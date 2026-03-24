@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.db.models import Case, When, Value, IntegerField
 from .forms import PostForm, PostImageForm
 from .models import Post, Tag, PostImage
 
@@ -51,13 +52,19 @@ def post_create(request):
 
 @login_required
 def feed_view(request):
-    # Fetch all posts, ordered by newest first
-    posts = Post.objects.all().order_by('-created_at')
+    # Get the list of IDs of people the user follows
+    followed_user_ids = request.user.following_relationships.values_list('following_id', flat=True)
 
-    return render(request, 'posts/feed.html', {
-        'posts': posts
-    })
+    # If the author is in followed_user_ids, weight = 1, else 0
+    posts = Post.objects.annotate(
+        priority=Case(
+            When(author_id__in=followed_user_ids, then=Value(1)),
+            default=Value(0),
+            output_field=IntegerField(),
+        )
+    ).order_by('-priority', '-created_at') # Order by priority (friends first) then by date
 
+    return render(request, 'posts/feed.html', {'posts': posts})
 
 @login_required
 def toggle_like(request, post_id):

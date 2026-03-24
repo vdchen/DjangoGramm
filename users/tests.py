@@ -1,6 +1,7 @@
+import pytest
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from .models import Profile
+from .models import Profile, Follow
 
 User = get_user_model()
 
@@ -29,3 +30,15 @@ class UserSignalTests(TestCase):
         """Test the string representation of the Profile model."""
         user = User.objects.create_user(username='vlad', password='123')
         self.assertEqual(str(user.profile), "Profile of vlad")
+
+
+@pytest.mark.django_db
+def test_follow_user():
+    user_a = User.objects.create_user(username='vlad', password='password123')
+    user_b = User.objects.create_user(username='mentor',
+                                      password='password123')
+
+    Follow.objects.create(follower=user_a, following=user_b)
+
+    assert user_a.following.count() == 1
+    assert user_b.followers.count() == 1
