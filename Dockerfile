@@ -1,3 +1,20 @@
+# --- Frontend ---
+FROM node:20-slim AS build-stage
+WORKDIR /app
+
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy frontend source and configuration
+COPY webpack.config.js ./
+COPY src/ ./src/
+
+# Run the build (creates static/dist/bundle.js)
+RUN npm run build
+
+
+# --- Backend ---
 FROM python:3.12-slim
 LABEL authors="vladi"
 
