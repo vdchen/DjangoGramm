@@ -12,6 +12,7 @@ from django.core.mail import send_mail
 from posts.models import Post
 from .forms import SignUpForm, ProfileForm
 from .models import CustomUser
+from DjangoGramm import settings
 
 User = get_user_model()
 
@@ -45,12 +46,40 @@ class SignUpView(View):
             # Generate token and link
             current_site = get_current_site(request)
             subject = 'Activate Your DjangoGramm Account'
-            message = render_to_string('registration/acc_active_email.html', {
+
+            # Use 'https' if you have SSL, otherwise 'http'
+            protocol = 'https' if request.is_secure() else 'http'
+
+            context = {
                 'user': user,
                 'domain': current_site.domain,
                 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
                 'token': default_token_generator.make_token(user),
-            })
+                'protocol': protocol,
+            }
+
+            message = render_to_string('registration/acc_active_email.html',
+                                       context)
+
+            # Send the real email
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [user.email],
+                    fail_silently=False,
+                )
+            except Exception as e:
+                # Log the error and perhaps show a message to the user
+                print(f"Email failed: {e}")
+
+            # message = render_to_string('registration/acc_active_email.html', {
+            #     'user': user,
+            #     'domain': current_site.domain,
+            #     'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+            #     'token': default_token_generator.make_token(user),
+            # })
 
             #email sender
             # send_mail(
@@ -62,7 +91,7 @@ class SignUpView(View):
             # )
 
             # link is printed to terminal
-            user.email_user(subject, message)
+            #user.email_user(subject, message)
 
             return render(request, 'registration/signup_done.html')
         return render(request, 'registration/signup.html', {'form': form})
